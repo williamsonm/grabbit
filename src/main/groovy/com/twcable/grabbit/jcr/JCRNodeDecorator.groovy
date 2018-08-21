@@ -191,9 +191,24 @@ class JCRNodeDecorator {
         else if (hasProperty(JCR_CREATED)) {
             return getProperty(JCR_CREATED).date.time
         }
-        return null
+        return getParentModifiedOrCreatedDate()
     }
 
+    /**
+     * Attempts to retrieve the created or modified date for the parent node.
+     * @return null if parent doesn't exist or has no date
+     */
+    @Nullable
+    private Date getParentModifiedOrCreatedDate() {
+        try {
+            if (parent != null) {
+                return new JCRNodeDecorator(parent).getModifiedOrCreatedDate()
+            }
+        } catch (ItemNotFoundException ex) {
+            log.error "Exception getting parent date for $path", ex
+        }
+        return null
+    }
 
     /**
      * Authorizable nodes can be unique from server to server, so associated profiles, preferences, etc need to be sent with.
